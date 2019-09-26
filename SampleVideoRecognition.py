@@ -46,9 +46,9 @@ while (cap.isOpened()):
                 boxes.append([x, y, w, h])
                 confidences.append(confidence)
 
-    font = cv2.FONT_HERSHEY_PLAIN
     for i in range(0, len(boxes)):
-        cv2.rectangle(image, (boxes[i][0], boxes[i][1]), (boxes[i][0] + boxes[i][2], boxes[i][1] + boxes[i][3]), (0, 255, 0), 2) 
+        x, y, w, h = boxes[i]
+        cv2.rectangle(image, (x, y, (x + w, y + h), (0, 255, 0), 2) 
 
     '''
     cv2.imshow("Image", image)
