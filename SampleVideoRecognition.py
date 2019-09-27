@@ -14,7 +14,7 @@ while (cap.isOpened()):
     success, image = cap.read()
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-       
+     
     height, width, channels = image.shape
     #Detect object
     blob = cv2.dnn.blobFromImage(image, 0.00392, (416, 416), (0, 0, 0), True, crop = False)
@@ -49,7 +49,7 @@ while (cap.isOpened()):
     for i in range(0, len(boxes)):
         x, y, w, h = boxes[i]
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2) 
-
+    
     cv2.imshow("Image", image)
 cap.release()
 cv2.destroyAllWindows()
