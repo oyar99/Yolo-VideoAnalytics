@@ -11,7 +11,7 @@ class VideoCapture:
     def read(self):
         success, frame = self.cap.read()
         if success:
-            return cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            return frame
         else:
             return None
 
