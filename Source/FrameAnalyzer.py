@@ -1,16 +1,20 @@
 import numpy as np
 import cv2
+from threading import Thread
 
-class FrameAnalyzer:
+
+class FrameAnalyzer(Thread):
 
     _running = False
     _stopped = False
+    boxes = []
 
     def __init__(self, algorithm, trained_model, classes, confidence):
         self.algorithm = algorithm
         self.trained_model = trained_model
         self.classes = classes
         self.confidence = confidence
+        super(FrameAnalyzer, self).__init__()
 
     def set_video_source(self,frame):
         self.frame = frame
@@ -18,7 +22,6 @@ class FrameAnalyzer:
     def run(self):
         if self._stopped:
             return self.frame
-
 
         self._running = True
         net = cv2.dnn.readNet(self.trained_model, self.algorithm)
@@ -33,8 +36,7 @@ class FrameAnalyzer:
         outs = net.forward(output_layers)
 
         confidences = []
-        boxes = []
-
+        empty = True
         for out in outs:
             for detection in out:
                 scores = detection[5:]
@@ -42,6 +44,7 @@ class FrameAnalyzer:
                 confidence_res = scores[class_id]
                 if (confidence_res > self.confidence):
                     print(confidence_res)
+                    empty = False
                     center_x = int(detection[0] * width)
                     center_y = int(detection[1] * height)
                     w = int(detection[2] * width)
@@ -50,15 +53,22 @@ class FrameAnalyzer:
                     x = int(center_x - w / 2)
                     y = int(center_y - h / 2)
 
-                    boxes.append([x, y, w, h])
+                    self.boxes.clear()
+                    self.boxes.append([x, y, w, h])
+
                     confidences.append(confidence_res)
         
-        for i in range(0, len(boxes)):
-            x, y, w, h = boxes[i]
-            cv2.rectangle(self.frame, (x,y), (x + w, y + h), (0, 255, 0), 2)
+        if empty:
+            self.boxes.clear()
         
         self._running = False
         return self.frame
+
+    def draw_detection(self, frame_local):
+        for i in range(0, len(self.boxes)):
+            x, y, w, h = self.boxes[i]
+            cv2.rectangle(frame_local, (x,y), (x + w, y + h), (0, 255, 0), 2)
+        return frame_local
 
     def is_running(self):
         return self._running

@@ -3,6 +3,7 @@ import tkinter as tk
 import videocap
 import FrameAnalyzer
 import cv2
+import time
 import PIL.Image as Image
 import PIL.ImageTk as ImageTk
 
@@ -15,10 +16,10 @@ text_tab_main = 'Video'
 text_tab_log = 'Log de resultados'
 
 #Datos de la red neuronal
-algorithm_path = 'yolo\\yolov3.cfg'
-trained_model_path = 'yolo\\yolov3.weights'
+algorithm_path = 'yolo\\yolov2-tiny.cfg'
+trained_model_path = 'yolo\\yolov2-tiny.weights'
 classes = ['person']
-confidence_limit = 0.9
+confidence_limit = 0.75
 
 #Crea la ventana principal
 window = tk.Tk()
@@ -45,12 +46,24 @@ video.grid(row=0, column=0)
 
 #Crea un objecto para capturar frames
 video_capture = videocap.VideoCapture(0)
+frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
+
+#benchmarking
+start_time = time.time()
+
 def get_frame():
     frame = video_capture.read()
-    frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
+    global frame_analyzer
     frame_analyzer.set_video_source(frame)
-    if not frame_analyzer.is_running():
-        frame = frame_analyzer.run()
+    if not frame_analyzer.isAlive():
+        global start_time
+        print("Time: " + str(time.time() - start_time))
+        frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
+        frame_analyzer.set_video_source(frame)
+        frame_analyzer.start()
+        start_time = time.time()
+      
+    frame = frame_analyzer.draw_detection(frame)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image = img)
