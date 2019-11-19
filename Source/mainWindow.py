@@ -21,7 +21,13 @@ icon_path = 'Assets\\logo.ico'
 text_tab_main = 'Video'
 text_tab_log = 'Log de resultados'
 log = 'Se ha detectado una persona con un nivel de confianza de: %s\n' 
+frame_text_begin = 'INICIO_FRAME\n'
+Frame_text_end = 'FINAL_FRAME\n'
 BEGIN = '1.0'
+TEXT = 'text'
+STOP = 'Detener'
+RESUME = 'Resumir'
+button_text = STOP
 #Other values used for GUI
 video_width = 600
 video_height = 480
@@ -37,6 +43,7 @@ confidence_limit = 0.75
 
 
 '''Entry point'''
+
 
 
 #Creates the root component of the GUI
@@ -67,7 +74,21 @@ video.grid(row=0, column=0)
 video_capture = videocap.VideoCapture(0)
 frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
 
+#Button action
+stop = False
+def clicked():
+    global button_text
+    global stop
+    stop =  not stop
+    if stop:
+        button_text = RESUME
+    else:
+        button_text = STOP
+
+
 #Configures the log tab
+button_stop = tk.Button(tab_log, text=button_text, command=clicked)
+button_stop.pack()
 scroll = tk.Scrollbar(tab_log)
 scroll.pack(side=tk.RIGHT, fill=tk.Y)
 text = tk.Text(tab_log, wrap=tk.NONE, yscrollcommand=scroll.set)
@@ -75,23 +96,33 @@ text.config(bg=terminal_color, fg=background_color)
 text.pack(side=tk.LEFT)
 scroll.config(command=text.yview)
 
+
+
 #Gets the camera frame periodically
 def get_frame():
-    frame = video_capture.read()
+    '''Global variables'''
+    global button_text
+    global button_stop
     global frame_analyzer
+
+    frame = video_capture.read()
     frame_analyzer.set_video_source(frame)
-    if not frame_analyzer.isAlive():
-        if frame_analyzer.con > confidence_limit:
-            contents = text.get(BEGIN, tk.END)
-            if contents is not None:
-                if len(contents) > max_text_size:
-                    text.delete(BEGIN, tk.END)
-            text.insert(tk.END, log % frame_analyzer.con)
-        text.see(tk.END)
-        frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
-        frame_analyzer.set_video_source(frame)
-        frame_analyzer.start()
-      
+    if not stop:
+        text.insert(tk.END, frame_text_begin)
+        if not frame_analyzer.isAlive():
+            if frame_analyzer.con > confidence_limit:
+                contents = text.get(BEGIN, tk.END)
+                if contents is not None:
+                    if len(contents) > max_text_size:
+                        text.delete(BEGIN, tk.END)
+                text.insert(tk.END, log % frame_analyzer.con)
+            text.see(tk.END)
+            frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
+            frame_analyzer.set_video_source(frame)
+            frame_analyzer.start()
+        text.insert(tk.END, Frame_text_end)
+
+    button_stop[TEXT] = button_text
     frame = frame_analyzer.draw_detection(frame)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(frame)
