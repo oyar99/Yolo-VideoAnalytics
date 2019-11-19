@@ -1,12 +1,9 @@
 #External modules
 from threading import Thread
+from constants import blue_color_bgr
 import numpy as np
 import cv2
 
-
-'''Variables'''
-#Constantes
-blue_color_bgr = (180, 75, 25)
 
 '''Class'''
 class FrameAnalyzer(Thread):
