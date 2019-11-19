@@ -1,6 +1,6 @@
 #External modules
 from threading import Thread
-from constants import blue_color_bgr
+from constants import BLUE_COLOR_BGR
 import numpy as np
 import cv2
 
@@ -47,7 +47,6 @@ class FrameAnalyzer(Thread):
                 class_id = np.argmax(scores)
                 confidence_res = scores[class_id]
                 if (confidence_res > self.confidence):
-                    print(confidence_res)
                     self.con = confidence_res
                     empty = False
                     center_x = int(detection[0] * width)
@@ -72,7 +71,7 @@ class FrameAnalyzer(Thread):
     def draw_detection(self, frame_local):
         for i in range(0, len(self.boxes)):
             x, y, w, h = self.boxes[i]
-            cv2.rectangle(frame_local, (x,y), (x + w, y + h), blue_color_bgr, 2)
+            cv2.rectangle(frame_local, (x,y), (x + w, y + h),BLUE_COLOR_BGR, 2)
         return frame_local
 
     def is_running(self):
