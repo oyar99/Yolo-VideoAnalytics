@@ -8,6 +8,7 @@ class FrameAnalyzer(Thread):
     _running = False
     _stopped = False
     boxes = []
+    con = 0
 
     def __init__(self, algorithm, trained_model, classes, confidence):
         self.algorithm = algorithm
@@ -44,6 +45,7 @@ class FrameAnalyzer(Thread):
                 confidence_res = scores[class_id]
                 if (confidence_res > self.confidence):
                     print(confidence_res)
+                    self.con = confidence_res
                     empty = False
                     center_x = int(detection[0] * width)
                     center_y = int(detection[1] * height)
