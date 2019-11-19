@@ -28,7 +28,7 @@ video_height = 480
 vide_x_pad = 10
 video_y_pad = 2
 update_frame_rate = 10
-max_text_size = 1000
+max_text_size = 100000
 #Neural network data
 algorithm_path = 'yolo\\yolov2-tiny.cfg'
 trained_model_path = 'yolo\\yolov2-tiny.weights'
