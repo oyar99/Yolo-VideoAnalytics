@@ -19,3 +19,6 @@ class VideoCapture:
 
     def release(self):
         self.cap.release()
+
+    def __del__(self):
+        self.release()
