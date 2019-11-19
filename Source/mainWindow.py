@@ -3,9 +3,10 @@ import tkinter as tk
 import videocap
 import FrameAnalyzer
 import cv2
-import time
 import PIL.Image as Image
 import PIL.ImageTk as ImageTk
+
+'''Variables'''
 
 #CONSTANTES
 #String usadas en la interfaz
@@ -17,12 +18,21 @@ icon_path = 'Assets\\logo.ico'
 text_tab_main = 'Video'
 text_tab_log = 'Log de resultados'
 log = 'Se ha detectado una persona con un nivel de confianza de: %s\n' 
-
+#Valores fijos de la interfaz
+video_width = 600
+video_height = 480
+vide_x_pad = 10
+video_y_pad = 2
+update_frame_rate = 10
 #Datos de la red neuronal
 algorithm_path = 'yolo\\yolov2-tiny.cfg'
 trained_model_path = 'yolo\\yolov2-tiny.weights'
 classes = ['person']
 confidence_limit = 0.75
+
+
+'''Entry point'''
+
 
 #Crea la ventana principal
 window = tk.Tk()
@@ -39,12 +49,12 @@ tab_log = tk.Frame(tab_control)
 tab_log.config(background=terminal_color)
 tab_control.add(tab_main, text = text_tab_main)
 tab_control.add(tab_log, text = text_tab_log)
-tab_control.pack(expand = 1, fill = 'both')
+tab_control.pack(expand = 1, fill = tk.BOTH)
 
 
 #Configura la pestana del video
-imageFrame = tk.Frame(tab_main, width=600, height=480)
-imageFrame.grid(row=0, column=0, padx=10, pady=2)
+imageFrame = tk.Frame(tab_main, width=video_width, height=video_height)
+imageFrame.grid(row=0, column=0, padx=vide_x_pad, pady=video_y_pad)
 video = tk.Label(imageFrame)
 video.grid(row=0, column=0)
 
@@ -61,24 +71,17 @@ text.pack(side=tk.LEFT)
 
 scroll.config(command=text.yview)
 
-#benchmarking
-start_time = time.time()
-
 def get_frame():
     frame = video_capture.read()
     global frame_analyzer
     frame_analyzer.set_video_source(frame)
     if not frame_analyzer.isAlive():
-        global start_time
-        print("Time: " + str(time.time() - start_time))
-        #text.insert(tk.END, "Time: %s\n" % str(time.time() - start_time))
         if frame_analyzer.con > confidence_limit:
             text.insert(tk.END, log % frame_analyzer.con)
         text.see(tk.END)
         frame_analyzer = FrameAnalyzer.FrameAnalyzer(algorithm_path, trained_model_path, classes, confidence_limit)
         frame_analyzer.set_video_source(frame)
         frame_analyzer.start()
-        start_time = time.time()
       
     frame = frame_analyzer.draw_detection(frame)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
@@ -86,7 +89,7 @@ def get_frame():
     imgtk = ImageTk.PhotoImage(image = img)
     video.imgtk = imgtk
     video.configure(image = imgtk)
-    video.after(10, get_frame)
+    video.after(update_frame_rate, get_frame)
 
 get_frame()
 window.mainloop()
