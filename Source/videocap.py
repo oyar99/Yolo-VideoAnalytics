@@ -1,5 +1,7 @@
+#External modules
 import cv2
 
+'''Class'''
 class VideoCapture:
 
     def __init__(self, index = 0):

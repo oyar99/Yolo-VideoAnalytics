@@ -1,8 +1,14 @@
+#External modules
+from threading import Thread
 import numpy as np
 import cv2
-from threading import Thread
 
 
+'''Variables'''
+#Constantes
+blue_color_bgr = (180, 75, 25)
+
+'''Class'''
 class FrameAnalyzer(Thread):
 
     _running = False
@@ -69,7 +75,7 @@ class FrameAnalyzer(Thread):
     def draw_detection(self, frame_local):
         for i in range(0, len(self.boxes)):
             x, y, w, h = self.boxes[i]
-            cv2.rectangle(frame_local, (x,y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.rectangle(frame_local, (x,y), (x + w, y + h), blue_color_bgr, 2)
         return frame_local
 
     def is_running(self):
